@@ -1,0 +1,30 @@
+{
+  "name": "search-filtering",
+  "version": "0.0.1",
+  "authors": [
+    "Mark H"
+  ],
+  "description": "search filtering",
+  "keywords": [
+    "polymer"
+  ],
+  "main": "search-filtering.html",
+  "license": "MIT",
+  "homepage": "https://github.com/MarkJamesHoward/search-filtering",
+  "ignore": [
+    "/.*",
+    "/tests/",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "../",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.4"
+  },
+  "devDependencies": {
+    "web-component-tester": "*"
+  }
+}
