@@ -1,41 +1,34 @@
 <link rel="import" href="~/Scripts/Polymer/polymer/polymer.html" />
 
-<polymer-element name="CheckBox-Master" attributes="items title">    
+<polymer-element name="CheckBox-Master" attributes="items groupTitle">    
     <template> 
                
         <style>            
-            paper-checkbox {
-                padding: 20px 20px 20px 0;
-                margin-top: 23px;
+            paper-checkbox {                
+                margin-top: 20px; margin-right: 20px;
             }         
            
-            div {
-                margin: 20px;
+            div#Container {
+                margin: 10px;
             }
         </style>
 
         <div id="Container">
             <content>
-                <h1>{{title}}</h1>
+                <h1>{{groupTitle}}</h1>
             </content>
 
             <form class="controls" id="Filters">
                 <fieldset>
                     <template repeat="{{item in items}}">
-                        <div horizontal layout>
-                            <paper-checkbox></paper-checkbox>                            
-                            <div vertical layout>
-                                <h2>{{item}}</h2>
-                                <h5>subtext</h5>
-                            </div>
+                        <div horizontal layout>                           
+                            <paper-checkbox data-search="{{item}}"></paper-checkbox>                                                        
+                            <h3>{{item}}</h3>                                                            
                             <br />
                         </div>
                     </template>
-                </fieldset>
-                <fieldset>                    
-                </fieldset>
-            </form>
-
+                </fieldset>               
+            </form>            
         </div>
 
     </template>
@@ -56,6 +49,10 @@
 
             ready: function () {
                 this.init();
+            },
+
+            displaySearch: function() {
+                this.fire('searchChanged', {search: this.outputString});
             },
 
             init: function () {
@@ -117,7 +114,7 @@
                     {                    
                         console.log(group.$inputs[i]);
                         if (group.$inputs[i].checked === true) {
-                            group.active.push(group.$inputs[i]);
+                            group.active.push(group.$inputs[i].dataset.search);
                         }
                     };
 
@@ -183,6 +180,8 @@
 
                 console.log('Final String:');
                 console.log(self.outputString);
+
+                this.displaySearch();
 
                 // ^ we can check the console here to take a look at the filter string that is produced
 
