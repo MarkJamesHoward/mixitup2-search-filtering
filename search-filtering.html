@@ -1,40 +1,51 @@
 <link rel="import" href="~/Scripts/Polymer/polymer/polymer.html" />
 
-<polymer-element name="CheckBox-Master" attributes="items groupTitle">    
-    <template> 
-               
-        <style>            
-            paper-checkbox {                
-                margin-top: 20px; margin-right: 20px;
-            }         
-           
+<polymer-element name="CheckBox-Master" attributes="items displayToast wrap">
+    <template>
+
+        <style>
+            paper-checkbox {
+                margin-top: 24px;
+                margin-right: 20px;
+            }
+
+            div.groupContainer {
+                margin: 20px;
+            }
+
             div#Container {
                 margin: 10px;
+                border-style: solid;
+                border-color: black;
+                border-width: thin;
             }
         </style>
 
-        <div id="Container">
-            <content>
-                <h1>{{groupTitle}}</h1>
-            </content>
+        <div id="Container" layout horizontal {{wrap}}>
 
-            <form class="controls" id="Filters">
-                <fieldset>
-                    <template repeat="{{item in items}}">
-                        <div horizontal layout>                           
-                            <paper-checkbox data-search="{{item}}"></paper-checkbox>                                                        
-                            <h3>{{item}}</h3>                                                            
-                            <br />
-                        </div>
-                    </template>
-                </fieldset>               
-            </form>            
+            <template repeat="{{item in items}}">
+                <div class="groupContainer">
+                    <h2>{{item.group}}</h2>
+                    <form class="controls">
+                        <fieldset>
+                            <template repeat="{{box in item.boxes}}">
+                                <div horizontal layout>
+                                    <paper-checkbox data-search="{{box}}"></paper-checkbox>
+                                    <h3>{{box}}</h3>
+                                    <br />
+                                </div>
+                            </template>
+                        </fieldset>
+                    </form>
+                </div>
+            </template>
+
         </div>
 
     </template>
-    
+
     <script>
-        
+
         Polymer({
 
             $filters: null,
@@ -42,29 +53,44 @@
             groups: [],
             outputArray: [],
             outputString: '',
+            displayToast: false,
 
             created: function () {
                 this.items = [];
+                this.group2 = [];
+                this.group3 = [];
+                this.groupTitles = [];
             },
 
             ready: function () {
                 this.init();
             },
 
-            displaySearch: function() {
-                this.fire('searchChanged', {search: this.outputString});
+            displaySearch: function () {
+
+                this.fire('searchChanged', { search: this.outputString });
+
             },
 
             init: function () {
                 var self = this; // As a best practice, in each method we will asign "this" to the variable "self" so that it remains scope-agnostic. We will use it to refer to the parent "checkboxFilter" object so that we can share methods and properties between all parts of the object.
-                
-                this.$filters = this.$.Filters;
+
+                this.$filters = [].slice.call(this.$.Container.querySelectorAll('.controls'));
+
+                console.log('filters');
+                console.log(this.$filters);
+
                 self.$reset = this.$.Reset
                 self.$container = this.$.Container;
 
-                var lists = [].slice.call(this.$filters.querySelectorAll('fieldset'));                
-          
-                for (i = 0; i < lists.length; ++i) {                    
+                var lists = [].slice.call(this.$.Container.querySelectorAll('fieldset'));
+
+                console.log('list length');
+                console.log(lists.length);
+
+                for (i = 0; i < lists.length; ++i) {
+                    console.log('another group');
+                    console.log('add group');
                     this.groups.push({
                         $inputs: lists[i].querySelectorAll('paper-checkbox'),
                         active: [],
@@ -79,9 +105,11 @@
             // The "bindHandlers" method will listen for whenever a form value changes.
 
             bindHandlers: function () {
-                var self = this;             
-
-                self.$filters.addEventListener("change", self.parseFilters.bind(this), false);
+                var self = this;
+                for (var i = 0; i < self.$filters.length; i++) {
+                    console.log('log');
+                    self.$filters[i].addEventListener("change", self.parseFilters.bind(this), false);
+                }
 
                 //self.$reset.on('click', function (e) {
                 //    e.preventDefault();
@@ -99,28 +127,24 @@
                 console.log('Here comes the parse group');
                 console.log(this.groups);
 
-                //for (var i = 0, group; group = self.groups[i]; i++) {
-                //    group.active = []; // reset arrays
-                //    group.$inputs.each(function () {
-                //        console.log(this);
-                //        $(this).is(':checked') && group.active.push(this.value);
-                //    });
-                //    group.active.length && (group.tracker = 0);
-                //}
-
-                for (var i = 0, group; group = self.groups[i]; i++) {
+                for (var i = 0; i < self.groups.length; i++) {
+                    var group = self.groups[i];
                     group.active = []; // reset arrays
-                    for (var i = 0; i < group.$inputs.length; i++)
-                    {                    
-                        console.log(group.$inputs[i]);
-                        if (group.$inputs[i].checked === true) {
-                            group.active.push(group.$inputs[i].dataset.search);
+                    console.log(self.groups.length);
+                    console.log(group.$inputs.length);
+                    console.log('*** group' + i);
+                    for (var inner = 0; inner < group.$inputs.length; inner++) {
+                        console.log('innercalled');
+                        if (group.$inputs[inner].checked == true) {
+                            console.log('checked is true ' + group.$inputs[inner].dataset.search);
+                            group.active.push(group.$inputs[inner].dataset.search)
                         }
                     };
-
+                    console.log('cancat');
                     group.active.length && (group.tracker = 0);
+                    console.log('cancat2');
                 }
-
+                console.log('cancat3');
                 self.concatenate();
             },
 
@@ -175,13 +199,14 @@
                 self.outputString = self.outputArray.join();
 
                 // If the output string is empty, show all rather than none:
-
                 !self.outputString.length && (self.outputString = 'all');
 
                 console.log('Final String:');
-                console.log(self.outputString);
+                console.log(self.outputString);                
 
-                this.displaySearch();
+                if (this.displayToast) {
+                    this.displaySearch();
+                }
 
                 // ^ we can check the console here to take a look at the filter string that is produced
 
@@ -196,4 +221,6 @@
 
     </script>
 </polymer-element>
+
+
 
